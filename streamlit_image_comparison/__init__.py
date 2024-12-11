@@ -155,6 +155,7 @@ def image_comparison(
 	label2: str = "2",
 	width: int = 704,
 	show_labels: bool = True,
+    img_type="RGBA",
 	starting_position: int = 50,
 	make_responsive: bool = True,
 	in_memory: bool = False,
@@ -189,8 +190,8 @@ def image_comparison(
 		Returns a static component with a timeline
 	"""
 	# Prepare images
-	img1_pillow = read_image_as_pil(img1, img_type="RGBA")
-	img2_pillow = read_image_as_pil(img2, img_type="RGBA")
+	img1_pillow = read_image_as_pil(img1, img_type=img_type)
+	img2_pillow = read_image_as_pil(img2, img_type=img_type)
 
 	img_width, img_height = img1_pillow.size
 	h_to_w = img_height / img_width

@@ -37,7 +37,7 @@ def exif_transpose(image: Image.Image):
 			image.info["exif"] = exif.tobytes()
 	return image
 
-def read_image_as_pil(image: Union[Image.Image, str, np.ndarray], exif_fix: bool = False):
+def read_image_as_pil(image: Union[Image.Image, str, np.ndarray], exif_fix: bool = False, img_type="RGBA"):
 	"""
 	Loads an image as PIL.Image.Image.
 	Args:
@@ -47,7 +47,7 @@ def read_image_as_pil(image: Union[Image.Image, str, np.ndarray], exif_fix: bool
 	Image.MAX_IMAGE_PIXELS = None
 
 	if isinstance(image, Image.Image):
-		image_pil = image.convert('RGB')
+		image_pil = image.convert(img_type)
 	elif isinstance(image, str):
 		# read image if str image path is provided
 		try:
@@ -63,17 +63,17 @@ def read_image_as_pil(image: Union[Image.Image, str, np.ndarray], exif_fix: bool
 				raise ImportError("Please run 'pip install -U scikit-image imagecodecs' for large image handling.")
 			image_sk = skimage.io.imread(image).astype(np.uint8)
 			if len(image_sk.shape) == 2:  # b&w
-				image_pil = Image.fromarray(image_sk, mode="1").convert("RGB")
+				image_pil = Image.fromarray(image_sk, mode="1").convert(img_type)
 			elif image_sk.shape[2] == 4:  # rgba
-				image_pil = Image.fromarray(image_sk, mode="RGBA").convert("RGB")
+				image_pil = Image.fromarray(image_sk, mode=img_type)
 			elif image_sk.shape[2] == 3:  # rgb
-				image_pil = Image.fromarray(image_sk, mode="RGB")
+				image_pil = Image.fromarray(image_sk, mode=img_type)
 			else:
 				raise TypeError(f"image with shape: {image_sk.shape[3]} is not supported.")
 	elif isinstance(image, np.ndarray):
 		if image.shape[0] < 5:  # image in CHW
 			image = image[:, :, ::-1]
-		image_pil = Image.fromarray(image).convert("RGB")
+		image_pil = Image.fromarray(image).convert(img_type)
 	else:
 		raise TypeError("read image with 'pillow' using 'Image.open()'")
 
@@ -161,7 +161,7 @@ def image_comparison(
 ) -> components.html:
 	"""
 	Create a comparison slider for two images.
-	
+
 	Parameters
 	----------
 	img1: str, PIL Image, or numpy array
@@ -189,8 +189,8 @@ def image_comparison(
 		Returns a static component with a timeline
 	"""
 	# Prepare images
-	img1_pillow = read_image_as_pil(img1)
-	img2_pillow = read_image_as_pil(img2)
+	img1_pillow = read_image_as_pil(img1, img_type="RGBA")
+	img2_pillow = read_image_as_pil(img2, img_type="RGBA")
 
 	img_width, img_height = img1_pillow.size
 	h_to_w = img_height / img_width
